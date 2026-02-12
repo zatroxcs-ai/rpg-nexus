@@ -1,0 +1,58 @@
+// Ajouter à backend/prisma/schema.prisma
+
+// REMPLACE le modèle TacticalMap existant par :
+
+model TacticalMap {
+  id          String   @id @default(uuid())
+  gameId      String   @unique
+  
+  // Scène active
+  activeSceneId String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  game        Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  scenes      MapScene[]
+  
+  @@index([gameId])
+}
+
+model MapScene {
+  id              String   @id @default(uuid())
+  tacticalMapId   String
+  
+  // Infos de la scène
+  name            String   @default("Nouvelle Scène")
+  order           Int      @default(0)
+  
+  // Configuration de la grille
+  gridSize        Int      @default(50)
+  gridWidth       Int      @default(30)
+  gridHeight      Int      @default(20)
+  gridColor       String   @default("#444444")
+  gridOpacity     Float    @default(0.5)
+  backgroundColor String   @default("#1a1a1a")
+  
+  // Image de fond
+  backgroundImage String?  // URL de l'image
+  backgroundOpacity Float  @default(1.0)
+  
+  // Unité de mesure
+  cellUnit        String   @default("5ft")
+  
+  // État du plateau
+  tokens          Json     @default("[]")
+  drawings        Json     @default("[]")
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  tacticalMap     TacticalMap @relation(fields: [tacticalMapId], references: [id], onDelete: Cascade)
+  
+  @@index([tacticalMapId])
+}
+
+// Ajouter au modèle Game :
+// diceRolls   DiceRoll[]  ← déjà existant
+// tacticalMap TacticalMap? ← déjà existant
