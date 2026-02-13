@@ -39,7 +39,7 @@ import type {
         'http://localhost:8080',
         process.env.FRONTEND_URL,
       ].filter(Boolean);
-      if (!origin || allowed.some(o => origin.startsWith(o)) || origin.endsWith('.railway.app')) {
+      if (!origin || allowed.some(o => origin.startsWith(o as string)) || origin.endsWith('.railway.app')) {
         callback(null, true);
       } else {
         callback(null, true); // permissif pour l'instant
@@ -621,7 +621,7 @@ export class WebsocketGateway implements OnGatewayConnection, OnGatewayDisconnec
           content: m.content,
           username: m.username,
           userId: m.userId,
-          role: m.role || 'PLAYER',
+
           timestamp: m.createdAt.toISOString(),
           isWhisper: m.isWhisper,
           targetUserId: m.targetUserId,
