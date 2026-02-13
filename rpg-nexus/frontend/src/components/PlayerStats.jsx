@@ -9,7 +9,12 @@ const authHeader = () => ({
 
 const toFullUrl = (url) => {
   if (!url) return null;
-  return url.startsWith('http') ? url : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${url}`;
+  // Remplace les URLs localhost stockées en BDD par l'URL de production
+  if (url.startsWith('http://localhost:3000')) {
+    return url.replace('http://localhost:3000', import.meta.env.VITE_API_URL || 'http://localhost:3000');
+  }
+  if (url.startsWith('http')) return url;
+  return `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${url}`;
 };
 
 const hpColor = (pct) => pct <= 25 ? 'text-red-400' : pct <= 50 ? 'text-orange-400' : pct <= 75 ? 'text-yellow-400' : 'text-green-400';

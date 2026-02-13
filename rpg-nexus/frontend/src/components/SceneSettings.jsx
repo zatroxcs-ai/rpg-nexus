@@ -4,7 +4,11 @@ import { useState, useEffect } from 'react';
 
 const normalizeUrl = (url) => {
   if (!url) return '';
-  return url.startsWith('http') ? url : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${url}`;
+  if (url.startsWith('http://localhost:3000')) {
+    return url.replace('http://localhost:3000', import.meta.env.VITE_API_URL || 'http://localhost:3000');
+  }
+  if (url.startsWith('http')) return url;
+  return `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${url}`;
 };
 
 export default function SceneSettings({ scene, gameId, onSave, onCancel }) {

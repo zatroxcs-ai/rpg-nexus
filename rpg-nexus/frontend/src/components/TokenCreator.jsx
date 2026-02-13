@@ -4,7 +4,12 @@ import { useState } from 'react';
 
 const toFullUrl = (url) => {
   if (!url) return null;
-  return url.startsWith('http') ? url : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${url}`;
+  // Remplace les URLs localhost stockées en BDD par l'URL de production
+  if (url.startsWith('http://localhost:3000')) {
+    return url.replace('http://localhost:3000', import.meta.env.VITE_API_URL || 'http://localhost:3000');
+  }
+  if (url.startsWith('http')) return url;
+  return `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${url}`;
 };
 
 export default function TokenCreator({ characters, monsters = [], onCreateToken, onCancel, position }) {
