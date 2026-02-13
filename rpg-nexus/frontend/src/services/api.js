@@ -119,8 +119,8 @@ export const gameAPI = {
   },
 
   // Inviter un joueur
-  invitePlayer: async (gameId, playerId) => {
-    const response = await api.post(`/game/${gameId}/invite`, { playerId });
+  invitePlayer: async (gameId, email) => {
+    const response = await api.post(`/game/${gameId}/invite`, { email });
     return response.data;
   },
 
