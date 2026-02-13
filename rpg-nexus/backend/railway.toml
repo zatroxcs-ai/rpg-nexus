@@ -2,6 +2,6 @@
 buildCommand = "npm install && npm run build && npx prisma generate"
 
 [deploy]
-startCommand = "npx prisma migrate deploy && node dist/main"
+startCommand = "npx prisma db push && node dist/main"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
