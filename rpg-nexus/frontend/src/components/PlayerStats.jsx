@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
-const API = '${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api';
+const API = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api`;
 const authHeader = () => ({
   'Authorization': `Bearer ${localStorage.getItem('token')}`,
   'Content-Type': 'application/json',
