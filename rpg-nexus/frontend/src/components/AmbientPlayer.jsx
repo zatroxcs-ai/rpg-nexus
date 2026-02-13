@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import websocketService from '../services/websocket';
 import api from '../services/api';
 
-const toUrl = (u) => (!u ? '' : u.startsWith('http') ? u : `http://localhost:3000${u}`);
+const toUrl = (u) => (!u ? '' : u.startsWith('http') ? u : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${u}`);
 
 export default function AmbientPlayer({ gameId, isGameMaster }) {
   const audioRef = useRef(new Audio());

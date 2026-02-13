@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import useDataSync from '../hooks/useDataSync';
 
-const API = '${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api';
+const API = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api`;
 const authHeader = () => ({
   'Authorization': `Bearer ${localStorage.getItem('token')}`,
   'Content-Type': 'application/json',
@@ -38,7 +38,7 @@ const hpColor = (pct) => pct <= 25 ? 'bg-red-500' : pct <= 50 ? 'bg-orange-500' 
 
 const toFullUrl = (url) => {
   if (!url) return null;
-  return url.startsWith('http') ? url : `http://localhost:3000${url}`;
+  return url.startsWith('http') ? url : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${url}`;
 };
 
 export default function CombatManager({ gameId, isGameMaster, triggerCssAnimation }) {

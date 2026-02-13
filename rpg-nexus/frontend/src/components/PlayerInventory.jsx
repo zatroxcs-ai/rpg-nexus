@@ -149,7 +149,7 @@ export default function PlayerInventory({ gameId }) {
             <div className="flex items-center gap-4">
               {selectedChar.avatar ? (
                 <img
-                  src={selectedChar.avatar.startsWith('http') ? selectedChar.avatar : `http://localhost:3000${selectedChar.avatar}`}
+                  src={selectedChar.avatar.startsWith('http') ? selectedChar.avatar : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${selectedChar.avatar}`}
                   alt={selectedChar.name}
                   className="w-16 h-16 rounded-full object-cover border-2 border-indigo-500 shrink-0"
                 />
@@ -311,7 +311,7 @@ export default function PlayerInventory({ gameId }) {
                         <div className="flex items-center gap-2">
                           {item.image && (
                             <img
-                              src={item.image.startsWith('http') ? item.image : `http://localhost:3000${item.image}`}
+                              src={item.image.startsWith('http') ? item.image : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${item.image}`}
                               alt={item.name}
                               className="w-10 h-10 rounded object-cover"
                             />

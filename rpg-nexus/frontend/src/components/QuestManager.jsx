@@ -33,7 +33,7 @@ const ENTITY_TYPE_COLORS = {
   monster: 'bg-red-900 text-red-300',
 };
 
-const toFullUrl = (url) => !url ? null : url.startsWith('http') ? url : 'http://localhost:3000' + url;
+const toFullUrl = (url) => !url ? null : url.startsWith('http') ? url : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${url}`;
 
 export default function QuestManager({ gameId }) {
   const [quests, setQuests] = useState([]);

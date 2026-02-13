@@ -171,7 +171,7 @@ export default function NpcManager({ gameId }) {
     }
   };
 
-  const toFullUrl = (url) => !url ? null : url.startsWith('http') ? url : 'http://localhost:3000' + url;
+  const toFullUrl = (url) => !url ? null : url.startsWith('http') ? url : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${url}`;
 
   const toggleSection = (key) => {
     setExpandedSections((prev) => ({ ...prev, [key]: !prev[key] }));

@@ -17,7 +17,7 @@ const ENTITY_COLORS = {
   npc: { bg: '#1e5f3a', border: '#10b981', label: 'PNJ' },
 };
 
-const toFullUrl = (url) => !url ? null : url.startsWith('http') ? url : 'http://localhost:3000' + url;
+const toFullUrl = (url) => !url ? null : url.startsWith('http') ? url : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${url}`;
 
 export default function RelationMap({ gameId, isGameMaster }) {
   const [relations, setRelations] = useState([]);

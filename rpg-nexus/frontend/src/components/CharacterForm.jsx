@@ -22,7 +22,7 @@ export default function CharacterForm({ gameId, character, onSubmit, onCancel, i
   const [gameItems, setGameItems] = useState([]);
   const [charItems, setCharItems] = useState([]);
 
-  const toFullUrl = (url) => !url ? null : url.startsWith('http') ? url : 'http://localhost:3000' + url;
+  const toFullUrl = (url) => !url ? null : url.startsWith('http') ? url : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${url}`;
 
   const loadAssets = async () => {
     try {

@@ -9,7 +9,7 @@ const authHeader = () => ({
 
 const toFullUrl = (url) => {
   if (!url) return null;
-  return url.startsWith('http') ? url : `http://localhost:3000${url}`;
+  return url.startsWith('http') ? url : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${url}`;
 };
 
 const hpColor = (pct) => pct <= 25 ? 'text-red-400' : pct <= 50 ? 'text-orange-400' : pct <= 75 ? 'text-yellow-400' : 'text-green-400';

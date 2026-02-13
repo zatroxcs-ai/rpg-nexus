@@ -8,7 +8,7 @@ export default function AssetCard({ asset, onDelete, canDelete }) {
   const [copied, setCopied] = useState(false);
 
   const copyUrl = () => {
-  const fullUrl = `http://localhost:3000${asset.url}`;  // ← Port 3000 en dur
+  const fullUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${asset.url}`;  // ← Port 3000 en dur
   console.log('📋 URL copiée:', fullUrl);
   navigator.clipboard.writeText(fullUrl);
   setCopied(true);
@@ -37,7 +37,7 @@ export default function AssetCard({ asset, onDelete, canDelete }) {
   };
 
   const renderPreview = () => {
-	  const fullUrl = `http://localhost:3000${asset.url}`;
+	  const fullUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${asset.url}`;
 
     if (asset.category === 'image') {
       return (

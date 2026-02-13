@@ -22,7 +22,7 @@ const modifier = (val) => {
 
 const toFullUrl = (url) => {
   if (!url) return null;
-  return url.startsWith('http') ? url : `http://localhost:3000${url}`;
+  return url.startsWith('http') ? url : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${url}`;
 };
 
 export default function CharacterCard({ character, items = [], onEdit, onDelete, canEdit, deleteConfirmId, onDeleteConfirm, onDeleteCancel }) {

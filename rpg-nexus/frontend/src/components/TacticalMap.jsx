@@ -6,11 +6,11 @@ import TokenCreator from './TokenCreator';
 import useDataSync from '../hooks/useDataSync';
 import SceneSettings from './SceneSettings';
 
-const API = '${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api';
+const API = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api`;
 
 const toFullUrl = (url) => {
   if (!url) return null;
-  return url.startsWith('http') ? url : `http://localhost:3000${url}`;
+  return url.startsWith('http') ? url : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${url}`;
 };
 
 const SIZE_LABELS = { 2: 'G', 3: 'E', 4: 'C' };

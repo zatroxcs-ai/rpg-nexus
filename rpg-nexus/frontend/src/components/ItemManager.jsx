@@ -24,7 +24,7 @@ const CATEGORY_ICONS = {
   divers: '\uD83D\uDCE6',
 };
 
-const toFullUrl = (url) => !url ? null : url.startsWith('http') ? url : 'http://localhost:3000' + url;
+const toFullUrl = (url) => !url ? null : url.startsWith('http') ? url : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${url}`;
 
 const emptyItem = {
   name: '',

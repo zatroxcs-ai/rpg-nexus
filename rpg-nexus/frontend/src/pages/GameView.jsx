@@ -275,7 +275,7 @@ export default function GameView() {
       ? hpPercent > 60 ? 'bg-green-500' : hpPercent > 25 ? 'bg-amber-500' : 'bg-red-500'
       : '';
     const charAvatar = playerChar?.avatar
-      ? (playerChar.avatar.startsWith('http') ? playerChar.avatar : `http://localhost:3000${playerChar.avatar}`)
+      ? (playerChar.avatar.startsWith('http') ? playerChar.avatar : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${playerChar.avatar}`)
       : null;
 
     return (

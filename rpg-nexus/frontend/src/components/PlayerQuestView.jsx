@@ -130,7 +130,7 @@ export default function PlayerQuestView({ gameId }) {
                 {q.assignments.map(a => (
                   <div key={a.id} className="flex items-center gap-2 px-3 py-2 bg-gray-700 rounded-lg">
                     {a.entityAvatar ? (
-                      <img src={a.entityAvatar.startsWith('http') ? a.entityAvatar : `http://localhost:3000${a.entityAvatar}`} alt="" className="w-6 h-6 rounded-full object-cover" />
+                      <img src={a.entityAvatar.startsWith('http') ? a.entityAvatar : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${a.entityAvatar}`} alt="" className="w-6 h-6 rounded-full object-cover" />
                     ) : (
                       <div className="w-6 h-6 rounded-full bg-gray-600 flex items-center justify-center text-xs text-gray-400">
                         {a.entityName?.[0]?.toUpperCase()}
@@ -157,7 +157,7 @@ export default function PlayerQuestView({ gameId }) {
               {(q.rewards || []).map(r => (
                 <div key={r.id} className="flex items-center gap-2 px-3 py-2 bg-gray-700 rounded-lg mb-1">
                   {r.itemImage && (
-                    <img src={r.itemImage.startsWith('http') ? r.itemImage : `http://localhost:3000${r.itemImage}`} alt="" className="w-8 h-8 rounded object-cover" />
+                    <img src={r.itemImage.startsWith('http') ? r.itemImage : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${r.itemImage}`} alt="" className="w-8 h-8 rounded object-cover" />
                   )}
                   <span className="text-white text-sm">{r.itemName}</span>
                   {r.quantity > 1 && <span className="text-gray-400 text-xs">x{r.quantity}</span>}
