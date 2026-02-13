@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import useDataSync from '../hooks/useDataSync';
 
-const API = 'http://localhost:3000/api';
+const API = '${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api';
 const authHeader = () => ({
   'Authorization': `Bearer ${localStorage.getItem('token')}`,
   'Content-Type': 'application/json',

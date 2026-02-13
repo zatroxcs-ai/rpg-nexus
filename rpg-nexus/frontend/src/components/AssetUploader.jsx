@@ -48,7 +48,7 @@ export default function AssetUploader({ gameId, onUploadComplete }) {
         const formData = new FormData();
         formData.append('file', file);
 
-        const response = await fetch(`http://localhost:3000/api/asset/upload/${gameId}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/asset/upload/${gameId}`, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${token}`,

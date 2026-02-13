@@ -6,7 +6,7 @@ import TokenCreator from './TokenCreator';
 import useDataSync from '../hooks/useDataSync';
 import SceneSettings from './SceneSettings';
 
-const API = 'http://localhost:3000/api';
+const API = '${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api';
 
 const toFullUrl = (url) => {
   if (!url) return null;

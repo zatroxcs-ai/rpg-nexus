@@ -29,7 +29,7 @@ export default function SceneSettings({ scene, gameId, onSave, onCancel }) {
   const loadAssets = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:3000/api/asset/game/${gameId}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/asset/game/${gameId}`, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);

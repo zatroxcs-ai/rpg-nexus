@@ -15,7 +15,7 @@ export default function MapBackgroundSelector({ gameId, onSelect, onCancel, curr
   const loadAssets = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3000/api/asset/game/${gameId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/asset/game/${gameId}`, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
       

@@ -56,7 +56,7 @@ export default function GameSettings({ gameId, game, players, onClose, onGameUpd
 
   const handleExport = async () => {
     try {
-      const res = await fetch(`http://localhost:3000/api/game/${gameId}/export`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/game/${gameId}/export`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       if (!res.ok) throw new Error('Export failed');
@@ -84,7 +84,7 @@ export default function GameSettings({ gameId, game, players, onClose, onGameUpd
         setImportStatus('loading');
         const text = await file.text();
         const data = JSON.parse(text);
-        const res = await fetch(`http://localhost:3000/api/game/${gameId}/import`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/game/${gameId}/import`, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
