@@ -1,0 +1,477 @@
+/* ===== OVERLAY ===== */
+.dice3d-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  animation: dice3d-appear 0.4s ease-out;
+}
+
+.dice3d-fadeout {
+  animation: dice3d-disappear 0.7s ease-in forwards;
+}
+
+.dice3d-backdrop {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 40%, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.92) 100%);
+}
+
+/* ===== STAGE (contient le cube + ombre) ===== */
+.dice3d-stage {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dice3d-perspective {
+  width: 180px;
+  height: 180px;
+  perspective: 800px;
+  perspective-origin: 50% 40%;
+}
+
+/* ===== CUBE 3D ===== */
+.dice3d-cube {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transform-origin: center center;
+}
+
+/* ===== FACES ===== */
+.dice3d-face {
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  backface-visibility: visible;
+}
+
+.dice3d-face-bg {
+  width: 100%;
+  height: 100%;
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--dice-light) 0%, var(--dice-base) 40%, var(--dice-dark) 100%);
+  border: 3px solid rgba(255, 255, 255, 0.15);
+  box-shadow:
+    inset 0 2px 6px rgba(255, 255, 255, 0.25),
+    inset 0 -4px 12px rgba(0, 0, 0, 0.4),
+    0 0 25px var(--dice-glow, rgba(255,255,255,0.2));
+}
+
+.dice3d-face-shine {
+  position: absolute;
+  top: -10%;
+  left: -10%;
+  width: 70%;
+  height: 70%;
+  background: radial-gradient(ellipse at 30% 30%, rgba(255,255,255,0.35) 0%, transparent 70%);
+  pointer-events: none;
+  border-radius: 50%;
+}
+
+.dice3d-face-edge {
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.2),
+    inset 0 -1px 0 rgba(0,0,0,0.3);
+  pointer-events: none;
+}
+
+/* Face positions - vrai cube 90px de demi-cote */
+.dice3d-f0 { transform: rotateY(0deg)    translateZ(90px); }
+.dice3d-f1 { transform: rotateY(180deg)  translateZ(90px); }
+.dice3d-f2 { transform: rotateY(90deg)   translateZ(90px); }
+.dice3d-f3 { transform: rotateY(-90deg)  translateZ(90px); }
+.dice3d-f4 { transform: rotateX(90deg)   translateZ(90px); }
+.dice3d-f5 { transform: rotateX(-90deg)  translateZ(90px); }
+
+/* ===== NUMEROS SUR LES FACES ===== */
+.dice3d-num {
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: #fff;
+  text-shadow:
+    0 2px 4px rgba(0,0,0,0.6),
+    0 0 15px rgba(255,255,255,0.4),
+    0 0 30px var(--dice-glow, rgba(255,255,255,0.2));
+  font-family: 'Georgia', 'Times New Roman', serif;
+  letter-spacing: -1px;
+  user-select: none;
+  position: relative;
+  z-index: 2;
+}
+
+/* ===== POINTS POUR D6 ===== */
+.dice3d-dots {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.dice3d-dot {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  background: radial-gradient(circle, #fff 40%, rgba(255,255,255,0.6) 70%, transparent 100%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4), 0 0 8px rgba(255,255,255,0.3);
+}
+
+/* ===== ANIMATIONS DE LANCER ===== */
+.dice3d-anim-roll {
+  animation: dice3d-roll 2s cubic-bezier(0.15, 0.8, 0.25, 1) forwards;
+}
+
+.dice3d-anim-settle {
+  animation: dice3d-settle 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes dice3d-roll {
+  0% {
+    transform: translateY(-300px) rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  20% {
+    transform: translateY(30px) rotateX(340deg) rotateY(200deg) rotateZ(80deg);
+  }
+  35% {
+    transform: translateY(-40px) rotateX(620deg) rotateY(420deg) rotateZ(180deg);
+  }
+  50% {
+    transform: translateY(15px) rotateX(900deg) rotateY(600deg) rotateZ(260deg);
+  }
+  65% {
+    transform: translateY(-15px) rotateX(1120deg) rotateY(780deg) rotateZ(330deg);
+  }
+  80% {
+    transform: translateY(5px) rotateX(1300deg) rotateY(920deg) rotateZ(350deg);
+  }
+  100% {
+    transform: translateY(0px) rotateX(1440deg) rotateY(1080deg) rotateZ(360deg);
+  }
+}
+
+@keyframes dice3d-settle {
+  0% {
+    transform: translateY(0px) rotateX(1440deg) rotateY(1080deg) rotateZ(360deg) scale(1);
+  }
+  40% {
+    transform: translateY(-8px) rotateX(1440deg) rotateY(1080deg) rotateZ(360deg) scale(1.12);
+  }
+  70% {
+    transform: translateY(2px) rotateX(1440deg) rotateY(1080deg) rotateZ(360deg) scale(0.97);
+  }
+  100% {
+    transform: translateY(0px) rotateX(1440deg) rotateY(1080deg) rotateZ(360deg) scale(1);
+  }
+}
+
+/* ===== OMBRE AU SOL ===== */
+.dice3d-shadow-container {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 40px;
+}
+
+.dice3d-floor-shadow {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  filter: blur(8px);
+}
+
+.dice3d-shadow-roll {
+  animation: dice3d-shadow-anim 2s ease-out forwards;
+}
+
+.dice3d-shadow-settle {
+  opacity: 0.7;
+  transform: scale(1);
+}
+
+@keyframes dice3d-shadow-anim {
+  0%   { opacity: 0; transform: scale(0.3); }
+  20%  { opacity: 0.8; transform: scale(1.2); }
+  35%  { opacity: 0.3; transform: scale(0.6); }
+  50%  { opacity: 0.7; transform: scale(1.1); }
+  65%  { opacity: 0.4; transform: scale(0.8); }
+  80%  { opacity: 0.65; transform: scale(1); }
+  100% { opacity: 0.7; transform: scale(1); }
+}
+
+/* ===== PAILLETTES DE FOND (flottent dans tout l'ecran) ===== */
+.dice3d-glitter-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.dice3d-glitter-dot {
+  position: absolute;
+  width: var(--g-size, 2px);
+  height: var(--g-size, 2px);
+  border-radius: 50%;
+  background: var(--g-color, #fff);
+  box-shadow: 0 0 4px var(--g-color, #fff), 0 0 8px var(--g-color, #fff);
+  opacity: 0;
+  animation: dice3d-glitter-twinkle var(--g-dur, 2s) ease-in-out var(--g-delay, 0s) infinite;
+}
+
+@keyframes dice3d-glitter-twinkle {
+  0%, 100% { opacity: 0; transform: scale(0.3); }
+  30% { opacity: 0.9; transform: scale(1.2); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+  70% { opacity: 1; transform: scale(1); }
+}
+
+/* ===== TRAINEE D'ETINCELLES (autour du de pendant le roll) ===== */
+.dice3d-trail {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.dice3d-trail-spark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--t-size, 4px);
+  height: var(--t-size, 4px);
+  border-radius: 50%;
+  background: var(--t-color, #fff);
+  box-shadow: 0 0 4px var(--t-color, #fff), 0 0 10px var(--t-color, #fff);
+  opacity: 0;
+  animation: dice3d-trail-fly var(--t-dur, 0.5s) ease-out var(--t-delay, 0s) infinite;
+}
+
+@keyframes dice3d-trail-fly {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.3);
+  }
+  10% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1.2);
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+    transform:
+      translate(
+        calc(cos(var(--t-angle, 0deg)) * var(--t-dist, 50px)),
+        calc(sin(var(--t-angle, 0deg)) * var(--t-dist, 50px))
+      )
+      scale(0);
+  }
+}
+
+/* ===== BURST DE PAILLETTES (au reveal du resultat) ===== */
+.dice3d-reveal-burst {
+  position: absolute;
+  inset: -60px;
+  pointer-events: none;
+}
+
+.dice3d-burst-particle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--b-size, 3px);
+  height: var(--b-size, 3px);
+  border-radius: 50%;
+  background: var(--b-color, #fff);
+  box-shadow: 0 0 6px var(--b-color, #fff), 0 0 14px var(--b-color, #fff);
+  opacity: 0;
+  animation: dice3d-burst-fly var(--b-dur, 0.8s) cubic-bezier(0.2, 0.8, 0.3, 1) var(--b-delay, 0s) forwards;
+}
+
+@keyframes dice3d-burst-fly {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1.5);
+  }
+  40% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform:
+      translate(
+        calc(cos(var(--b-angle, 0deg)) * var(--b-dist, 100px)),
+        calc(sin(var(--b-angle, 0deg)) * var(--b-dist, 100px))
+      )
+      scale(0);
+  }
+}
+
+/* ===== GLOW CRITIQUE / FUMBLE ===== */
+.dice3d-crit-glow .dice3d-face-bg {
+  box-shadow:
+    inset 0 2px 6px rgba(255, 255, 255, 0.3),
+    inset 0 -4px 12px rgba(0, 0, 0, 0.3),
+    0 0 40px rgba(250, 204, 21, 0.8),
+    0 0 80px rgba(250, 204, 21, 0.4),
+    0 0 120px rgba(250, 204, 21, 0.2);
+  border-color: rgba(250, 204, 21, 0.6);
+}
+
+.dice3d-fumble-glow .dice3d-face-bg {
+  box-shadow:
+    inset 0 2px 6px rgba(255, 255, 255, 0.1),
+    inset 0 -4px 12px rgba(0, 0, 0, 0.6),
+    0 0 30px rgba(107, 114, 128, 0.4);
+  border-color: rgba(107, 114, 128, 0.4);
+  filter: saturate(0.4) brightness(0.7);
+}
+
+/* ===== RAYONS CRITIQUE ===== */
+.dice3d-crit-burst {
+  position: absolute;
+  inset: -100px;
+  pointer-events: none;
+}
+
+.dice3d-crit-ray {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 3px;
+  height: 180px;
+  transform-origin: center top;
+  transform: rotate(var(--ray-angle, 0deg));
+  background: linear-gradient(to bottom, rgba(250, 204, 21, 0.8), transparent);
+  border-radius: 2px;
+  animation: dice3d-ray-pulse 0.8s ease-in-out infinite alternate;
+  filter: blur(1px);
+}
+
+@keyframes dice3d-ray-pulse {
+  from { opacity: 0.3; height: 120px; }
+  to   { opacity: 0.8; height: 200px; }
+}
+
+/* ===== RESULTAT ===== */
+.dice3d-info {
+  position: relative;
+  text-align: center;
+  margin-top: 24px;
+  animation: dice3d-info-appear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.dice3d-info-formula {
+  font-size: 1rem;
+  color: #9ca3af;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin-bottom: 6px;
+}
+
+.dice3d-info-total {
+  font-size: 5rem;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 0 30px var(--glow-color, rgba(255,255,255,0.5)), 0 4px 12px rgba(0,0,0,0.5);
+  line-height: 1;
+  font-family: 'Georgia', serif;
+}
+
+.dice3d-info-crit {
+  color: #facc15;
+  text-shadow:
+    0 0 30px rgba(250, 204, 21, 0.9),
+    0 0 60px rgba(250, 204, 21, 0.5),
+    0 0 100px rgba(250, 204, 21, 0.3);
+  animation: dice3d-crit-pulse 0.5s ease-in-out infinite alternate;
+}
+
+.dice3d-info-fumble {
+  color: #6b7280;
+  text-shadow: none;
+  filter: brightness(0.7);
+}
+
+.dice3d-info-label {
+  font-weight: 900;
+  margin-top: 8px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+.dice3d-info-label-crit {
+  font-size: 1.6rem;
+  color: #facc15;
+  text-shadow: 0 0 20px rgba(250, 204, 21, 0.6);
+  animation: dice3d-crit-pulse 0.4s ease-in-out infinite alternate;
+}
+
+.dice3d-info-label-fumble {
+  font-size: 1.3rem;
+  color: #ef4444;
+  letter-spacing: 2px;
+}
+
+.dice3d-info-user {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin-top: 14px;
+  font-weight: 500;
+}
+
+/* ===== KEYFRAMES GENERIQUES ===== */
+@keyframes dice3d-appear {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes dice3d-disappear {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+@keyframes dice3d-info-appear {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes dice3d-crit-pulse {
+  from { transform: scale(1); }
+  to   { transform: scale(1.08); }
+}
