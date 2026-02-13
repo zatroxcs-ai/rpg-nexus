@@ -17,7 +17,8 @@ export class AuthService {
 
   // 📝 INSCRIPTION
   async register(registerDto: RegisterDto): Promise<AuthResponseDto> {
-    const { email, username, password, role } = registerDto;
+    const { email: rawEmail, username, password, role } = registerDto;
+    const email = rawEmail.toLowerCase().trim();
 
     // 1️⃣ Vérifie si l'email existe déjà
     const existingUser = await this.prisma.user.findFirst({
@@ -59,7 +60,8 @@ export class AuthService {
 
   // 🔐 CONNEXION
   async login(loginDto: LoginDto): Promise<AuthResponseDto> {
-    const { emailOrUsername, password } = loginDto;
+    const { emailOrUsername: rawEmailOrUsername, password } = loginDto;
+    const emailOrUsername = rawEmailOrUsername.toLowerCase().trim();
 
     // 1️⃣ Trouve l'utilisateur (par email OU username)
     const user = await this.prisma.user.findFirst({

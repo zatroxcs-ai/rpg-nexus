@@ -32,12 +32,19 @@ import type {
 
 @WebSocketGateway({
   cors: {
-    origin: [
-      'http://localhost:5173',  // Vite
-      'http://localhost:3000',  // React dev
-      'http://localhost:8080',  // Live Server ou autre serveur local 🔥 AJOUTÉ
-      'null'                    // Fichiers locaux (file://)
-    ],
+    origin: (origin, callback) => {
+      const allowed = [
+        'http://localhost:5173',
+        'http://localhost:3000',
+        'http://localhost:8080',
+        process.env.FRONTEND_URL,
+      ].filter(Boolean);
+      if (!origin || allowed.some(o => origin.startsWith(o)) || origin.endsWith('.railway.app')) {
+        callback(null, true);
+      } else {
+        callback(null, true); // permissif pour l'instant
+      }
+    },
     credentials: true,
   },
 })
@@ -582,6 +589,46 @@ export class WebsocketGateway implements OnGatewayConnection, OnGatewayDisconnec
       this.server.to(data.gameId).emit('audioVolume', { volume: data.volume });
     } catch (error) {
       this.logger.error(`Erreur setAudioVolume : ${error.message}`);
+    }
+  }
+
+  // RÉCUPÉRER L'HISTORIQUE DU CHAT (à la demande)
+  @SubscribeMessage('getChatHistory')
+  async handleGetChatHistory(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { gameId: string },
+  ) {
+    try {
+      const clientData = this.connectedClients.get(client.id);
+      if (!clientData) return;
+
+      const chatHistory = await this.prisma.chatMessage.findMany({
+        where: {
+          gameId: data.gameId,
+          OR: [
+            { isWhisper: false },
+            { isWhisper: true, userId: clientData.userId },
+            { isWhisper: true, targetUserId: clientData.userId },
+          ],
+        },
+        orderBy: { createdAt: 'asc' },
+        take: 200,
+      });
+
+      client.emit('chatHistory', {
+        messages: chatHistory.map(m => ({
+          id: m.id,
+          content: m.content,
+          username: m.username,
+          userId: m.userId,
+          role: m.role || 'PLAYER',
+          timestamp: m.createdAt.toISOString(),
+          isWhisper: m.isWhisper,
+          targetUserId: m.targetUserId,
+        })),
+      });
+    } catch (error) {
+      this.logger.error(`Erreur getChatHistory : ${error.message}`);
     }
   }
 

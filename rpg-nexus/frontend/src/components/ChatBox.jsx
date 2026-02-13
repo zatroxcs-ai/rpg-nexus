@@ -38,6 +38,13 @@ export default function ChatBox() {
         socket.on('diceRolled', diceHandler);
         socket.off('chatHistory', historyHandler);
         socket.on('chatHistory', historyHandler);
+
+        // Si le socket est déjà connecté et qu'on a manqué le chatHistory initial, le redemander
+        const gameId = websocketService.store?.currentGame?.id;
+        if (gameId && socket.connected) {
+          socket.emit('getChatHistory', { gameId });
+        }
+
         return true;
       }
       return false;
