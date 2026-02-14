@@ -68,7 +68,7 @@ export default function TacticalMap({ isGameMaster, characters = [] }) {
 
   const [showTokenCreator, setShowTokenCreator] = useState(false);
   const [tokenPosition, setTokenPosition] = useState(null);
-  const [showScenePanel, setShowScenePanel] = useState(true);
+  const [showScenePanel, setShowScenePanel] = useState(isGameMaster);
   const [showSceneSettings, setShowSceneSettings] = useState(false);
   const [editingScene, setEditingScene] = useState(null);
 
@@ -774,7 +774,22 @@ export default function TacticalMap({ isGameMaster, characters = [] }) {
               onMouseUp={handleMouseUp}
               onMouseLeave={() => { handleMouseUp(); setHoveredToken(null); }}
               onContextMenu={handleContextMenu}
-
+              onTouchStart={(e) => {
+                e.preventDefault();
+                const t = e.touches[0];
+                const rect = e.currentTarget.getBoundingClientRect();
+                handleMouseDown({ clientX: t.clientX, clientY: t.clientY, button: 0, currentTarget: { getBoundingClientRect: () => rect } });
+              }}
+              onTouchMove={(e) => {
+                e.preventDefault();
+                const t = e.touches[0];
+                const rect = e.currentTarget.getBoundingClientRect();
+                handleMouseMove({ clientX: t.clientX, clientY: t.clientY, currentTarget: { getBoundingClientRect: () => rect } });
+              }}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                handleMouseUp();
+              }}
               className={`${isGameMaster ? 'cursor-crosshair' : 'cursor-default'} block w-full h-full`}
             />
           </div>
