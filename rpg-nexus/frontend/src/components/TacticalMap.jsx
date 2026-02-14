@@ -44,6 +44,7 @@ export default function TacticalMap({ isGameMaster, characters = [] }) {
   const [activeScene, setActiveScene] = useState(null);
   const [loading, setLoading] = useState(true);
   const [monsters, setMonsters] = useState([]);
+  const [localCharacters, setLocalCharacters] = useState([]);
 
   const [selectedTool, setSelectedTool] = useState('select');
   const [selectedColor, setSelectedColor] = useState('#ff0000');
@@ -107,10 +108,22 @@ export default function TacticalMap({ isGameMaster, characters = [] }) {
     } catch { setMonsters([]); }
   }, [gameId]);
 
-  useEffect(() => { loadAtlas(); loadMonsters(); }, [loadAtlas, loadMonsters]);
+  const loadCharacters = useCallback(async () => {
+    try {
+      const res = await fetch(`${API}/character/game/${gameId}`, { headers: authHeader() });
+      if (res.ok) {
+        const data = await res.json();
+        setLocalCharacters(Array.isArray(data) ? data : []);
+      }
+    } catch { setLocalCharacters([]); }
+  }, [gameId]);
+
+  useEffect(() => { loadAtlas(); loadMonsters(); loadCharacters(); }, [loadAtlas, loadMonsters, loadCharacters]);
 
   const syncMap = useCallback(() => { if (!draggingRef.current) loadAtlas(); }, [loadAtlas]);
   useDataSync('tactical-map', syncMap);
+  const syncChars = useCallback(() => { loadCharacters(); }, [loadCharacters]);
+  useDataSync('character', syncChars);
   useEffect(() => { if (activeScene) drawMap(); }, [activeScene, currentDrawing, measureStart, measureEnd, exploredCells]);
 
   useEffect(() => {
@@ -905,7 +918,7 @@ export default function TacticalMap({ isGameMaster, characters = [] }) {
 
       {showTokenCreator && (
         <TokenCreator
-          characters={characters}
+          characters={localCharacters.length > 0 ? localCharacters : characters}
           monsters={monsters}
           position={tokenPosition}
           onCreateToken={addToken}
