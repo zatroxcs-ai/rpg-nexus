@@ -134,13 +134,22 @@ export default function GameView() {
     };
   }, [gameId]);
 
+  // Ref stable pour éviter que dice3d dans les deps cause un reset de lastDiceCountRef
+  const dice3dRef = useRef(null);
+  useEffect(() => { dice3dRef.current = dice3d; }, [dice3d]);
+
   useEffect(() => {
+    // Initialise le compteur au moment du montage seulement
+    lastDiceCountRef.current = (websocketService.store.diceRolls || []).length;
+
     const unsub = websocketService.subscribeStore((store) => {
       const rolls = store.diceRolls || [];
       if (rolls.length > lastDiceCountRef.current && rolls.length > 0) {
         const latest = rolls[rolls.length - 1];
         lastDiceCountRef.current = rolls.length;
-        if (!dice3d && latest.username === user?.username) {
+        // Affiche l'animation si aucune animation en cours
+        // (pour tout le monde dans la room, pas seulement soi-même)
+        if (!dice3dRef.current) {
           setDice3d({
             diceType: latest.diceType || 20,
             result: Array.isArray(latest.results) ? latest.results[0] : latest.total,
@@ -151,9 +160,9 @@ export default function GameView() {
         }
       }
     });
-    lastDiceCountRef.current = (websocketService.store.diceRolls || []).length;
+
     return unsub;
-  }, [dice3d, isGameMaster, user?.username]);
+  }, []); // ← dépendances vides : subscription stable, jamais re-créée
 
   useEffect(() => {
     if (!user?.id || !gameId || loading) return;
