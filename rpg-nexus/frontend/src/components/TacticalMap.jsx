@@ -789,19 +789,57 @@ export default function TacticalMap({ isGameMaster, characters = [] }) {
               onContextMenu={handleContextMenu}
               onTouchStart={(e) => {
                 e.preventDefault();
-                const t = e.touches[0];
-                const rect = e.currentTarget.getBoundingClientRect();
-                handleMouseDown({ clientX: t.clientX, clientY: t.clientY, button: 0, currentTarget: { getBoundingClientRect: () => rect } });
+                if (e.touches.length === 1) {
+                  // 1 doigt : pan ou interaction
+                  const t = e.touches[0];
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  if (!isGameMaster) {
+                    // Joueur : 1 doigt = pan toujours
+                    setIsPanning(true);
+                    setPanStart({ x: t.clientX - panOffset.x, y: t.clientY - panOffset.y });
+                  } else {
+                    handleMouseDown({ clientX: t.clientX, clientY: t.clientY, button: 0, currentTarget: { getBoundingClientRect: () => rect } });
+                  }
+                } else if (e.touches.length === 2) {
+                  // 2 doigts : début du pinch-to-zoom
+                  const dx = e.touches[0].clientX - e.touches[1].clientX;
+                  const dy = e.touches[0].clientY - e.touches[1].clientY;
+                  e.currentTarget._pinchDist = Math.hypot(dx, dy);
+                  e.currentTarget._pinchZoom = zoom;
+                  setIsPanning(false);
+                }
               }}
               onTouchMove={(e) => {
                 e.preventDefault();
-                const t = e.touches[0];
-                const rect = e.currentTarget.getBoundingClientRect();
-                handleMouseMove({ clientX: t.clientX, clientY: t.clientY, currentTarget: { getBoundingClientRect: () => rect } });
+                if (e.touches.length === 1 && !isGameMaster) {
+                  // Pan 1 doigt joueur
+                  const t = e.touches[0];
+                  if (isPanning && panStart) {
+                    setPanOffset({ x: t.clientX - panStart.x, y: t.clientY - panStart.y });
+                  }
+                } else if (e.touches.length === 1 && isGameMaster) {
+                  const t = e.touches[0];
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  handleMouseMove({ clientX: t.clientX, clientY: t.clientY, currentTarget: { getBoundingClientRect: () => rect } });
+                } else if (e.touches.length === 2) {
+                  // Pinch-to-zoom
+                  const dx = e.touches[0].clientX - e.touches[1].clientX;
+                  const dy = e.touches[0].clientY - e.touches[1].clientY;
+                  const dist = Math.hypot(dx, dy);
+                  const startDist = e.currentTarget._pinchDist;
+                  const startZoom = e.currentTarget._pinchZoom;
+                  if (startDist && startZoom) {
+                    const newZoom = Math.max(0.3, Math.min(3, startZoom * (dist / startDist)));
+                    setZoom(newZoom);
+                  }
+                }
               }}
               onTouchEnd={(e) => {
                 e.preventDefault();
-                handleMouseUp();
+                if (e.touches.length === 0) {
+                  setIsPanning(false);
+                  if (isGameMaster) handleMouseUp();
+                }
               }}
               className={`${isGameMaster ? 'cursor-crosshair' : 'cursor-default'} block w-full h-full`}
             />
