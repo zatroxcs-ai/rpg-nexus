@@ -261,12 +261,23 @@ export class CombatService {
           include: { participants: { where: { isAlive: true }, orderBy: [{ sortOrder: 'asc' }] } },
         });
 
-        if (freshCombat.participants.length < 2) break;
+        const aliveCount = freshCombat.participants.length;
+        if (aliveCount < 2) break;
+
+        // Clamp currentIdx aux bounds actuels
+        if (currentIdx >= aliveCount) {
+          currentIdx = 0;
+          currentRound += 1;
+          await this.prisma.combat.update({
+            where: { id: combatId },
+            data: { currentTurn: currentIdx, round: currentRound },
+          });
+        }
 
         const current = freshCombat.participants[currentIdx];
         if (!current || current.type !== 'MONSTER') break;
 
-        const targets = freshCombat.participants.filter(p => p.type === 'CHARACTER' && p.isAlive && p.id !== current.id);
+        const targets = freshCombat.participants.filter(p => p.type === 'CHARACTER' && p.id !== current.id);
         if (targets.length === 0) break;
 
         const target = targets[Math.floor(Math.random() * targets.length)];
@@ -282,7 +293,8 @@ export class CombatService {
         }
 
         currentIdx += 1;
-        if (currentIdx >= freshCombat.participants.length) {
+        const afterCount = await this.prisma.combatParticipant.count({ where: { combatId, isAlive: true } });
+        if (currentIdx >= afterCount) {
           currentIdx = 0;
           currentRound += 1;
         }
@@ -537,10 +549,23 @@ export class CombatService {
           where: { id: combatId },
           include: { participants: { where: { isAlive: true }, orderBy: [{ sortOrder: 'asc' }] } },
         });
-        if (freshCombat.participants.length < 2) break;
+        const aliveCount = freshCombat.participants.length;
+        if (aliveCount < 2) break;
+
+        // Clamp currentIdx aux bounds actuels (un participant a pu mourir entre-temps)
+        if (currentIdx >= aliveCount) {
+          currentIdx = 0;
+          currentRound += 1;
+          await this.prisma.combat.update({
+            where: { id: combatId },
+            data: { currentTurn: currentIdx, round: currentRound },
+          });
+        }
+
         const current = freshCombat.participants[currentIdx];
         if (!current || current.type !== 'MONSTER') break;
-        const targets = freshCombat.participants.filter(p => p.type === 'CHARACTER' && p.isAlive && p.id !== current.id);
+
+        const targets = freshCombat.participants.filter(p => p.type === 'CHARACTER' && p.id !== current.id);
         if (targets.length === 0) break;
         const target = targets[Math.floor(Math.random() * targets.length)];
         const monActions = current.actions as any[];
@@ -552,8 +577,11 @@ export class CombatService {
           console.error('[ADVANCE-AUTO] executeAttack error:', err?.message || err);
           break;
         }
+
         currentIdx += 1;
-        if (currentIdx >= freshCombat.participants.length) {
+        // Refetch count après l'attaque (la cible a pu mourir)
+        const afterCount = await this.prisma.combatParticipant.count({ where: { combatId, isAlive: true } });
+        if (currentIdx >= afterCount) {
           currentIdx = 0;
           currentRound += 1;
         }
@@ -614,6 +642,10 @@ export class CombatService {
       fleeTotal,
       dc,
       success,
+      // Champs aliasés pour que le frontend puisse afficher le résultat uniformément
+      attackRoll: fleeRoll,
+      successRate: (21 - dc) * 5, // DC10 → 55%, DC15 → 30%, etc.
+      hits: success,
       timestamp: new Date().toISOString(),
     };
 
