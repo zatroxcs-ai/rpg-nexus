@@ -57,9 +57,8 @@ export default function DiceRollerAdvanced() {
 
       // Mode Normal
       const parsed = parseDiceFormula(formula);
-      const results = rollDice(parsed.count, parsed.diceType);
-      const total = calculateTotal(results, parsed.modifier);
-
+      // On envoie directement au serveur qui calcule les résultats
+      // (évite un crash de DiceParser qui bloque silencieusement sendRoll)
       sendRoll(parsed.diceType, parsed.count, parsed.modifier, reason);
       setReason('');
     } catch (err) {
