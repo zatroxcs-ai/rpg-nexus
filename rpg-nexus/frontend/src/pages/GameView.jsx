@@ -433,7 +433,7 @@ export default function GameView() {
 
           <div className="flex items-center gap-3">
             <div className="text-sm text-gray-400">
-              {players.length + 1} joueur(s) connecte(s)
+              {players.filter(p => p.id !== currentGame?.ownerId).length + 1} joueur(s) connecte(s)
             </div>
 
             <button
@@ -678,19 +678,37 @@ export default function GameView() {
                 </div>
               )}
 
-              {/* Joueurs connectes */}
-              {players.map((player) => (
-                <div
-                  key={player.id}
-                  className="flex items-center gap-2 p-2 bg-gray-700 rounded"
-                >
-                  <div className="text-2xl">PJ</div>
-                  <div>
-                    <div className="font-semibold">{player.username}</div>
-                    <div className="text-xs text-green-400">En ligne</div>
+              {/* Joueurs connectes - exclure le MJ qui est déjà affiché au dessus */}
+              {players
+                .filter(p => p.id !== currentGame?.ownerId)
+                .map((player) => (
+                  <div
+                    key={player.id}
+                    className="flex items-center gap-2 p-2 bg-gray-700 rounded"
+                  >
+                    <div className="text-2xl">PJ</div>
+                    <div>
+                      <div className="font-semibold">{player.username}</div>
+                      <div className="text-xs text-green-400">● En ligne</div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              {/* Joueurs invités mais non connectés */}
+              {(currentGame?.players || [])
+                .map(gp => gp.player)
+                .filter(p => p && p.id !== currentGame?.ownerId && !players.find(pl => pl.id === p.id))
+                .map((player) => (
+                  <div
+                    key={player.id}
+                    className="flex items-center gap-2 p-2 bg-gray-700 bg-opacity-50 rounded"
+                  >
+                    <div className="text-2xl opacity-40">PJ</div>
+                    <div>
+                      <div className="font-semibold text-gray-400">{player.username}</div>
+                      <div className="text-xs text-gray-500">● Hors ligne</div>
+                    </div>
+                  </div>
+                ))}
             </div>
           </div>
 
