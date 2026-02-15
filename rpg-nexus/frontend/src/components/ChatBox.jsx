@@ -19,37 +19,66 @@ export default function ChatBox() {
     setMessages([...(websocketService.store?.messages || [])]);
     setDiceRolls([...(websocketService.store?.diceRolls || [])]);
 
-    // subscribeStore = seul mécanisme de mise à jour
-    // websocket.connect() capture chatMessage/chatHistory/diceRolled
-    // → met à jour le store → _notifyStore() → ce callback se déclenche
-    const unsub = websocketService.subscribeStore((store) => {
-      setMessages([...(store.messages || [])]);
-      setDiceRolls([...(store.diceRolls || [])]);
-    });
-
-    // Demander l'historique seulement si le store est vide
-    // (évite d'écraser des messages récents lors d'un changement d'onglet)
-    const requestHistory = () => {
-      const socket = websocketService.getSocket?.();
-      const gameId = websocketService.store?.currentGame?.id;
-      if (socket?.connected && gameId) {
-        // Ne charger l'historique que si on n'a pas encore de messages
-        if ((websocketService.store?.messages || []).length === 0) {
-          socket.emit('getChatHistory', { gameId });
-        }
-        return true;
+    const chatHandler = (data) => {
+      if (!data?.message) return;
+      // Mettre à jour le store ET le state directement
+      const exists = websocketService.store.messages.some(m => m.id === data.message.id);
+      if (!exists) {
+        websocketService.store.messages = [...websocketService.store.messages, data.message];
       }
-      return false;
+      setMessages([...websocketService.store.messages]);
     };
 
-    if (!requestHistory()) {
+    const diceHandler = (data) => {
+      if (!data?.roll) return;
+      const exists = websocketService.store.diceRolls.some(r => r.id === data.roll.id);
+      if (!exists) {
+        websocketService.store.diceRolls = [...websocketService.store.diceRolls, data.roll];
+      }
+      setDiceRolls([...websocketService.store.diceRolls]);
+    };
+
+    const historyHandler = (data) => {
+      if (!data?.messages) return;
+      websocketService.store.messages = data.messages;
+      setMessages([...data.messages]);
+    };
+
+    const attach = () => {
+      const socket = websocketService.getSocket?.();
+      const gameId = websocketService.store?.currentGame?.id;
+      if (!socket) return false;
+
+      // Attacher directement sur le socket (bypass websocketService.on())
+      socket.off('chatMessage', chatHandler);
+      socket.on('chatMessage', chatHandler);
+      socket.off('diceRolled', diceHandler);
+      socket.on('diceRolled', diceHandler);
+      socket.off('chatHistory', historyHandler);
+      socket.on('chatHistory', historyHandler);
+
+      // Demander l'historique seulement si le store est vide
+      if (socket.connected && gameId && websocketService.store.messages.length === 0) {
+        socket.emit('getChatHistory', { gameId });
+      }
+      return true;
+    };
+
+    if (!attach()) {
       const interval = setInterval(() => {
-        if (requestHistory()) clearInterval(interval);
+        if (attach()) clearInterval(interval);
       }, 200);
       setTimeout(() => clearInterval(interval), 5000);
     }
 
-    return () => { unsub?.(); };
+    return () => {
+      const socket = websocketService.getSocket?.();
+      if (socket) {
+        socket.off('chatMessage', chatHandler);
+        socket.off('diceRolled', diceHandler);
+        socket.off('chatHistory', historyHandler);
+      }
+    };
   }, []);
 
   useEffect(() => {
