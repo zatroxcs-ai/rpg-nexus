@@ -539,9 +539,9 @@ export default function GameView() {
           </div>
 
           {/* Contenu des onglets */}
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden" style={{ minHeight: 0 }}>
             {activeTab === 'chat' && (
-              <div className="h-full">
+              <div className="h-full overflow-hidden flex flex-col">
                 <ChatBox />
               </div>
             )}
