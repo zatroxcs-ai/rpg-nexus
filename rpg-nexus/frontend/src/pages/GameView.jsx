@@ -541,7 +541,7 @@ export default function GameView() {
           {/* Contenu des onglets */}
           <div className="flex-1 overflow-hidden" style={{ minHeight: 0 }}>
             {activeTab === 'chat' && (
-              <div className="h-full overflow-hidden flex flex-col">
+              <div className="h-full overflow-hidden">
                 <ChatBox />
               </div>
             )}
@@ -678,37 +678,26 @@ export default function GameView() {
                 </div>
               )}
 
-              {/* Joueurs connectes - exclure le MJ qui est déjà affiché au dessus */}
+              {/* Tous les joueurs invités avec leur statut en ligne/hors ligne */}
               {players
                 .filter(p => p.id !== currentGame?.ownerId)
-                .map((player) => (
-                  <div
-                    key={player.id}
-                    className="flex items-center gap-2 p-2 bg-gray-700 rounded"
-                  >
-                    <div className="text-2xl">PJ</div>
-                    <div>
-                      <div className="font-semibold">{player.username}</div>
-                      <div className="text-xs text-green-400">● En ligne</div>
+                .map((player) => {
+                  const isOnline = player.online === true;
+                  return (
+                    <div
+                      key={player.id}
+                      className={`flex items-center gap-2 p-2 rounded ${isOnline ? 'bg-gray-700' : 'bg-gray-700 bg-opacity-50'}`}
+                    >
+                      <div className={`text-2xl ${isOnline ? '' : 'opacity-40'}`}>PJ</div>
+                      <div>
+                        <div className={`font-semibold ${isOnline ? '' : 'text-gray-400'}`}>{player.username}</div>
+                        <div className={`text-xs ${isOnline ? 'text-green-400' : 'text-gray-500'}`}>
+                          {isOnline ? '● En ligne' : '● Hors ligne'}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              {/* Joueurs invités mais non connectés */}
-              {(currentGame?.players || [])
-                .map(gp => gp.player)
-                .filter(p => p && p.id !== currentGame?.ownerId && !players.find(pl => pl.id === p.id))
-                .map((player) => (
-                  <div
-                    key={player.id}
-                    className="flex items-center gap-2 p-2 bg-gray-700 bg-opacity-50 rounded"
-                  >
-                    <div className="text-2xl opacity-40">PJ</div>
-                    <div>
-                      <div className="font-semibold text-gray-400">{player.username}</div>
-                      <div className="text-xs text-gray-500">● Hors ligne</div>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
             </div>
           </div>
 

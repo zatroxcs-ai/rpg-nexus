@@ -36,9 +36,11 @@ export const GameProvider = ({ children }) => {
       setCurrentGame(game);
       setIsInGame(true);
 
-      // Ne pas initialiser depuis l'API - players = seulement ceux connectés via WS
-      // connectedPlayers arrive dans gameState depuis le backend
-      setPlayers([]);
+      // Init depuis l'API = tous les invités (base), sera affiné par connectedPlayers
+      const playerList = (game.players || [])
+        .map(p => p.player)
+        .filter(Boolean);
+      setPlayers(playerList);
 
       websocketService.joinGame(gameId);
       return { success: true };
@@ -110,23 +112,35 @@ export const GameProvider = ({ children }) => {
     const handleGameState = (state) => {
       console.log('📊 État du jeu reçu:', state);
       setGameState(state);
-      // Initialiser la liste des joueurs connectés depuis le gameState
+      // Mettre à jour le statut en ligne avec les joueurs réellement connectés
+      // mais garder tous les invités dans la liste (pour afficher hors ligne aussi)
       if (Array.isArray(state.connectedPlayers)) {
-        setPlayers(state.connectedPlayers);
+        setPlayers(prev => prev.map(p => ({
+          ...p,
+          online: state.connectedPlayers.some(cp => cp.id === p.id),
+        })));
       }
     };
 
     const handlePlayerJoined = (data) => {
       console.log('👥 Joueur rejoint:', data.player.username);
       setPlayers(prev => {
-        if (prev.find(p => p.id === data.player.id)) return prev;
-        return [...prev, data.player];
+        const exists = prev.find(p => p.id === data.player.id);
+        if (exists) {
+          // Marquer comme en ligne
+          return prev.map(p => p.id === data.player.id ? { ...p, online: true } : p);
+        }
+        // Nouveau joueur pas encore dans la liste
+        return [...prev, { ...data.player, online: true }];
       });
     };
 
     const handlePlayerLeft = (data) => {
       console.log('👋 Joueur parti:', data.playerId);
-      setPlayers(prev => prev.filter(p => p.id !== data.playerId));
+      // Marquer hors ligne plutôt que retirer (pour garder la liste des invités)
+      setPlayers(prev => prev.map(p =>
+        p.id === data.playerId ? { ...p, online: false } : p
+      ));
     };
 
     const handleAnimationTriggered = (data) => {
