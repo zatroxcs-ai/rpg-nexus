@@ -645,6 +645,11 @@ export class WebsocketGateway implements OnGatewayConnection, OnGatewayDisconnec
       throw new Error('Partie introuvable');
     }
 
+    // Liste des joueurs réellement connectés à cette partie (hors MJ)
+    const connectedPlayers = Array.from(this.connectedClients.values())
+      .filter(c => c.gameId === gameId && c.userId !== game.ownerId)
+      .map(c => ({ id: c.userId, username: c.username }));
+
     return {
       game: {
         id: game.id,
@@ -653,6 +658,7 @@ export class WebsocketGateway implements OnGatewayConnection, OnGatewayDisconnec
       },
       characters: game.characters,
       animations: game.animations,
+      connectedPlayers,
     };
   }
 

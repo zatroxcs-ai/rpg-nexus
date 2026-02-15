@@ -27,12 +27,16 @@ export default function ChatBox() {
       setDiceRolls([...(store.diceRolls || [])]);
     });
 
-    // Demander l'historique au serveur (réponse gérée par websocket.connect())
+    // Demander l'historique seulement si le store est vide
+    // (évite d'écraser des messages récents lors d'un changement d'onglet)
     const requestHistory = () => {
       const socket = websocketService.getSocket?.();
       const gameId = websocketService.store?.currentGame?.id;
       if (socket?.connected && gameId) {
-        socket.emit('getChatHistory', { gameId });
+        // Ne charger l'historique que si on n'a pas encore de messages
+        if ((websocketService.store?.messages || []).length === 0) {
+          socket.emit('getChatHistory', { gameId });
+        }
         return true;
       }
       return false;

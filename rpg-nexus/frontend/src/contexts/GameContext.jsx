@@ -36,10 +36,9 @@ export const GameProvider = ({ children }) => {
       setCurrentGame(game);
       setIsInGame(true);
 
-      const playerList = (game.players || [])
-        .map(p => p.player)
-        .filter(p => p.id !== game.ownerId);
-      setPlayers(playerList);
+      // Ne pas initialiser depuis l'API - players = seulement ceux connectés via WS
+      // connectedPlayers arrive dans gameState depuis le backend
+      setPlayers([]);
 
       websocketService.joinGame(gameId);
       return { success: true };
@@ -111,6 +110,10 @@ export const GameProvider = ({ children }) => {
     const handleGameState = (state) => {
       console.log('📊 État du jeu reçu:', state);
       setGameState(state);
+      // Initialiser la liste des joueurs connectés depuis le gameState
+      if (Array.isArray(state.connectedPlayers)) {
+        setPlayers(state.connectedPlayers);
+      }
     };
 
     const handlePlayerJoined = (data) => {
