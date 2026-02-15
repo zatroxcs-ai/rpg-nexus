@@ -15,37 +15,33 @@ export default function ChatBox() {
   const isGameMaster = currentGame?.ownerId === user?.id;
 
   useEffect(() => {
-    // Initialiser depuis le store existant
+    // Lire le store immédiatement au montage
     setMessages([...(websocketService.store?.messages || [])]);
     setDiceRolls([...(websocketService.store?.diceRolls || [])]);
 
-    // subscribeStore = mecanisme principal fiable meme si le composant monte tardivement
+    // subscribeStore = seul mécanisme de mise à jour
+    // chatMessage, chatHistory, diceRolled sont tous gérés dans websocket.connect()
+    // qui met à jour le store et appelle _notifyStore() → ce callback se déclenche
     const unsub = websocketService.subscribeStore((store) => {
       setMessages([...(store.messages || [])]);
       setDiceRolls([...(store.diceRolls || [])]);
     });
 
-    // Redemander l'historique chat si on a monte apres l'event initial
-    const attachHistory = () => {
+    // Demander l'historique au serveur via le socket
+    // La réponse chatHistory est traitée dans websocket.connect() → store → subscribeStore
+    const requestHistory = () => {
       const socket = websocketService.getSocket?.();
-      if (socket) {
-        const historyHandler = (data) => {
-          setMessages(data.messages || []);
-        };
-        socket.off('chatHistory', historyHandler);
-        socket.on('chatHistory', historyHandler);
-        const gameId = websocketService.store?.currentGame?.id;
-        if (gameId && socket.connected) {
-          socket.emit('getChatHistory', { gameId });
-        }
+      const gameId = websocketService.store?.currentGame?.id;
+      if (socket?.connected && gameId) {
+        socket.emit('getChatHistory', { gameId });
         return true;
       }
       return false;
     };
 
-    if (!attachHistory()) {
+    if (!requestHistory()) {
       const interval = setInterval(() => {
-        if (attachHistory()) clearInterval(interval);
+        if (requestHistory()) clearInterval(interval);
       }, 200);
       setTimeout(() => clearInterval(interval), 5000);
     }
