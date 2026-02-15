@@ -46,7 +46,8 @@ export default function ChatBox() {
 
     const attach = () => {
       const socket = websocketService.getSocket?.();
-      const gameId = websocketService.store?.currentGame?.id;
+      // Lire gameId depuis le store OU depuis currentGame du hook (joueur)
+      const gameId = websocketService.store?.currentGame?.id || currentGame?.id;
       if (!socket) return false;
 
       // Attacher directement sur le socket (bypass websocketService.on())
@@ -79,7 +80,7 @@ export default function ChatBox() {
         socket.off('chatHistory', historyHandler);
       }
     };
-  }, []);
+  }, [currentGame?.id]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
