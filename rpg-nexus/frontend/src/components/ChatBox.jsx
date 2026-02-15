@@ -15,56 +15,42 @@ export default function ChatBox() {
   const isGameMaster = currentGame?.ownerId === user?.id;
 
   useEffect(() => {
+    // Initialiser depuis le store existant
     setMessages([...(websocketService.store?.messages || [])]);
+    setDiceRolls([...(websocketService.store?.diceRolls || [])]);
 
-    const handler = (data) => {
-      setMessages(prev => [...prev, data.message]);
-    };
+    // subscribeStore = mecanisme principal fiable meme si le composant monte tardivement
+    const unsub = websocketService.subscribeStore((store) => {
+      setMessages([...(store.messages || [])]);
+      setDiceRolls([...(store.diceRolls || [])]);
+    });
 
-    const diceHandler = (data) => {
-      setDiceRolls(prev => [...prev, data.roll]);
-    };
-
-    const historyHandler = (data) => {
-      setMessages(data.messages || []);
-    };
-
-    const attachHandler = () => {
+    // Redemander l'historique chat si on a monte apres l'event initial
+    const attachHistory = () => {
       const socket = websocketService.getSocket?.();
       if (socket) {
-        socket.off('chatMessage', handler);
-        socket.on('chatMessage', handler);
-        socket.off('diceRolled', diceHandler);
-        socket.on('diceRolled', diceHandler);
+        const historyHandler = (data) => {
+          setMessages(data.messages || []);
+        };
         socket.off('chatHistory', historyHandler);
         socket.on('chatHistory', historyHandler);
-
-        // Si le socket est déjà connecté et qu'on a manqué le chatHistory initial, le redemander
         const gameId = websocketService.store?.currentGame?.id;
         if (gameId && socket.connected) {
           socket.emit('getChatHistory', { gameId });
         }
-
         return true;
       }
       return false;
     };
 
-    if (!attachHandler()) {
+    if (!attachHistory()) {
       const interval = setInterval(() => {
-        if (attachHandler()) clearInterval(interval);
+        if (attachHistory()) clearInterval(interval);
       }, 200);
       setTimeout(() => clearInterval(interval), 5000);
     }
 
-    return () => {
-      const socket = websocketService.getSocket?.();
-      if (socket) {
-        socket.off('chatMessage', handler);
-        socket.off('diceRolled', diceHandler);
-        socket.off('chatHistory', historyHandler);
-      }
-    };
+    return () => { unsub?.(); };
   }, []);
 
   useEffect(() => {

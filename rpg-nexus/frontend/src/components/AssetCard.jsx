@@ -7,13 +7,19 @@ import { useState } from 'react';
 export default function AssetCard({ asset, onDelete, canDelete }) {
   const [copied, setCopied] = useState(false);
 
+  // Les URLs Cloudinary commencent déjà par https:// - ne pas les préfixer
+  const toFullUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${url}`;
+  };
+
   const copyUrl = () => {
-  const fullUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${asset.url}`;  // ← Port 3000 en dur
-  console.log('📋 URL copiée:', fullUrl);
-  navigator.clipboard.writeText(fullUrl);
-  setCopied(true);
-  setTimeout(() => setCopied(false), 2000);
-};
+    const fullUrl = toFullUrl(asset.url);
+    navigator.clipboard.writeText(fullUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const formatSize = (bytes) => {
     if (bytes < 1024) return bytes + ' B';
@@ -37,7 +43,7 @@ export default function AssetCard({ asset, onDelete, canDelete }) {
   };
 
   const renderPreview = () => {
-	  const fullUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${asset.url}`;
+    const fullUrl = toFullUrl(asset.url);
 
     if (asset.category === 'image') {
       return (
