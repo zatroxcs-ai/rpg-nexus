@@ -19,34 +19,66 @@ export default function ChatBox() {
     setMessages([...(websocketService.store?.messages || [])]);
     setDiceRolls([...(websocketService.store?.diceRolls || [])]);
 
-    // subscribeStore = seul mécanisme de mise à jour
-    // chatMessage, chatHistory, diceRolled sont tous gérés dans websocket.connect()
-    // qui met à jour le store et appelle _notifyStore() → ce callback se déclenche
+    // subscribeStore : se déclenche quand websocket.js met à jour le store
+    // (chatMessage, chatHistory, diceRolled sont tous capturés dans connect())
     const unsub = websocketService.subscribeStore((store) => {
       setMessages([...(store.messages || [])]);
       setDiceRolls([...(store.diceRolls || [])]);
     });
 
-    // Demander l'historique au serveur via le socket
-    // La réponse chatHistory est traitée dans websocket.connect() → store → subscribeStore
-    const requestHistory = () => {
+    // Listener direct sur chatMessage pour les cas où subscribeStore
+    // ne se déclenche pas (ex: remount après changement d'onglet MJ)
+    const chatHandler = (data) => {
+      if (data?.message) {
+        websocketService.store.messages = [
+          ...websocketService.store.messages,
+          data.message,
+        ];
+        setMessages([...websocketService.store.messages]);
+      }
+    };
+
+    const diceHandler = (data) => {
+      if (data?.roll) {
+        websocketService.store.diceRolls = [
+          ...websocketService.store.diceRolls,
+          data.roll,
+        ];
+        setDiceRolls([...websocketService.store.diceRolls]);
+      }
+    };
+
+    const attachAndRequest = () => {
       const socket = websocketService.getSocket?.();
       const gameId = websocketService.store?.currentGame?.id;
-      if (socket?.connected && gameId) {
-        socket.emit('getChatHistory', { gameId });
+      if (socket?.connected) {
+        // Attacher les listeners directs (bypass le on() qui bloque chatMessage)
+        socket.off('chatMessage', chatHandler);
+        socket.on('chatMessage', chatHandler);
+        socket.off('diceRolled', diceHandler);
+        socket.on('diceRolled', diceHandler);
+        // Demander l'historique
+        if (gameId) socket.emit('getChatHistory', { gameId });
         return true;
       }
       return false;
     };
 
-    if (!requestHistory()) {
+    if (!attachAndRequest()) {
       const interval = setInterval(() => {
-        if (requestHistory()) clearInterval(interval);
+        if (attachAndRequest()) clearInterval(interval);
       }, 200);
       setTimeout(() => clearInterval(interval), 5000);
     }
 
-    return () => { unsub?.(); };
+    return () => {
+      unsub?.();
+      const socket = websocketService.getSocket?.();
+      if (socket) {
+        socket.off('chatMessage', chatHandler);
+        socket.off('diceRolled', diceHandler);
+      }
+    };
   }, []);
 
   useEffect(() => {
